@@ -1,4 +1,4 @@
-VERSION := 0.1
+PKG_VERSION := 0.1
 
 PACKAGES := -package compiler-libs.common \
             -package ppx_tools \
@@ -34,4 +34,4 @@ _build/ppx_monoid: _build/ppx_monoid.cmx
 _build/META: META.in
 	@echo $@
 	@mkdir -p _build
-	sed 's/$$(pkg_version)/$(VERSION)/g' < $< > $@
+	sed 's/$$(pkg_version)/$(PKG_VERSION)/g' < $< > $@
