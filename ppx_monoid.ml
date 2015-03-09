@@ -1,5 +1,3 @@
-(* ocamlfind ocamlopt -package compiler-libs.bytecomp -package ppx_tools.metaquot -package ppx_tools -linkpkg -w A-4-9 -o ppx_monoid ppx_monoid.ml *)
-
 open Asttypes
 open Parsetree
 open Ast_mapper
