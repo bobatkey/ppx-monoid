@@ -29,6 +29,27 @@ let rec translate ops mapper expr = match expr.pexp_desc with
      let expr2 = translate ops mapper expr2 in
      [%expr [%e ops.add expr.pexp_loc] [%e expr1] [%e expr2]]
 
+  | Pexp_ifthenelse (expr1, expr2, expr3) ->
+     let expr1 = map_expr mapper expr1 in
+     let expr2 = translate ops mapper expr2 in
+     (match expr3 with
+       | None ->
+          [%expr if [%e expr1] then [%e expr2]
+                 else [%e ops.empty expr.pexp_loc]]
+       | Some expr3 ->
+          let expr3 = translate ops mapper expr3 in
+          [%expr if [%e expr1] then [%e expr2] else [%e expr3]])
+
+  | Pexp_match (expr, cases) ->
+     let expr = map_expr mapper expr in
+     let cases =
+       List.map
+         (fun ({pc_rhs} as c) ->
+            {c with pc_rhs=translate ops mapper pc_rhs})
+         cases
+     in
+     { expr with pexp_desc = Pexp_match (expr, cases) }
+
   | Pexp_let (recflag, bindings, body) ->
      let bindings =
        List.map
@@ -51,6 +72,7 @@ and map_expr mapper expr = match expr.pexp_desc with
             }
           in
           translate ops mapper expr
+
        | "monoid", Some prefix ->
           let with_prefix ident loc =
             Exp.ident ~loc
@@ -62,6 +84,7 @@ and map_expr mapper expr = match expr.pexp_desc with
             }
           in
           translate ops mapper expr
+
        | _, _ ->
           default_mapper.expr mapper expr)
 
