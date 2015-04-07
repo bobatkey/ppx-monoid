@@ -92,4 +92,4 @@ and map_expr mapper expr = match expr.pexp_desc with
      default_mapper.expr mapper expr
 
 let _ =
-  run_main (fun _ -> {default_mapper with expr = map_expr})
+  register "ppx_monoid" (fun _ -> {default_mapper with expr = map_expr})

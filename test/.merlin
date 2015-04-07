@@ -1,0 +1,2 @@
+PKG oUnit
+FLG -ppx ../_build/ppx_monoid
