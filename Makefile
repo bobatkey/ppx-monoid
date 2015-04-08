@@ -4,7 +4,7 @@
 SRCDIR := src
 include OCamlSrcs.makefile
 
-SRCDIR   := test
+SRCDIR := test
 PPX_BINS := src/_build/native_bin/ppx_monoid
 include OCamlSrcs.makefile
 
