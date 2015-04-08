@@ -1,50 +1,19 @@
-PKG_VERSION := 0.1
+.DEFAULT_GOAL := all
+.PHONY: all test clean
 
-PACKAGES := -package compiler-libs.common \
-            -package ppx_tools \
-            -package ppx_tools.metaquot
+SRCDIR := src
+include OCamlSrcs.makefile
 
-TEST_PACKAGES := -package oUnit
+SRCDIR   := test
+PPX_BINS := src/_build/native_bin/ppx_monoid
+include OCamlSrcs.makefile
 
-OCAMLOPT := ocamlfind ocamlopt -w A-4-9
+all: src/_build/native_bin/ppx_monoid
 
-############################################################################
-.PHONY: all clean install uninstall test
-
-all: _build/ppx_monoid _build/META
-
-install: all
-	@ocamlfind install ppx_monoid _build/META _build/ppx_monoid
-
-uninstall:
-	@ocamlfind remove ppx_monoid
+test: test/_build/native_bin/test
+	@test/_build/native_bin/test
 
 clean:
-	rm -rf _build
+	rm -rf src/_build
+	rm -rf test/_build
 
-test: _build/test
-	@_build/test
-
-############################################################################
-_build:
-	@mkdir -p $@
-
-_build/ppx_monoid.cmx: src/ppx_monoid.ml | _build
-	@echo $@
-	@$(OCAMLOPT) $(PACKAGES) -o $@ -c $<
-
-_build/ppx_monoid: _build/ppx_monoid.cmx | _build
-	@echo $@
-	@$(OCAMLOPT) $(PACKAGES) -linkpkg -o $@ $^
-
-_build/META: META.in | _build
-	@echo $@
-	@sed 's/$$(pkg_version)/$(PKG_VERSION)/g' < $< > $@
-
-_build/test.cmx: test/test.ml _build/ppx_monoid | _build
-	@echo $@
-	@$(OCAMLOPT) $(TEST_PACKAGES) -w -44 -ppx _build/ppx_monoid -o $@ -c $<
-
-_build/test: _build/test.cmx | _build
-	@echo $@
-	@$(OCAMLOPT) $(TEST_PACKAGES) -linkpkg $^ -o $@

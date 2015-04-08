@@ -1,2 +1,3 @@
 PKG oUnit
-FLG -ppx ../_build/ppx_monoid
+FLG -ppx ../src/_build/native_bin/ppx_monoid
+FLG -safe-string
