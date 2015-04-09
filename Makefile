@@ -24,6 +24,7 @@ clean:
 	rm -rf src/_build
 	rm -rf test/_build
 	rm -f META
+	rm -f oUnit-anon.cache
 
 PKG_VERSION := 0.1
 
