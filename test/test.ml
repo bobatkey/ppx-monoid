@@ -23,7 +23,7 @@ let tests =
         assert_equal (begin%monoid.M "foo"; "bar" end) "foobar")
     
   ; "let open" >:: (fun () ->
-        let open M in
+        let open! M in
         assert_equal (begin%monoid "foo"; "bar" end) "foobar")
 
   ; "nested let" >:: (fun () -> 
@@ -36,7 +36,7 @@ let tests =
         assert_equal x "foofoo")
 
   ; "nested let begin..end" >:: (fun () ->
-        let open M in
+        let open! M in
         let x =
           begin%monoid
             (* this wouldn't type check if the inner begin..end was
@@ -49,7 +49,7 @@ let tests =
 
   (* Nesting begin..end expressions *)
   ; "nested begin..end, left" >:: (fun () ->
-        let open M in
+        let open! M in
         let x =
           begin%monoid
             begin
@@ -62,7 +62,7 @@ let tests =
         assert_equal x "foobarbaz")
 
   ; "nested begin..end, right" >:: (fun () ->
-        let open M in
+        let open! M in
         let x =
           begin%monoid
             "baz";
@@ -76,7 +76,7 @@ let tests =
 
   (* Without begin..end *)
   ; "without begin..end" >:: (fun () ->
-        let open M in
+        let open! M in
         let x =
           [%monoid
             "foo";
@@ -87,7 +87,7 @@ let tests =
 
 (* If-then-else expressions *)
   ; "if-then-else" >:: (fun () ->
-        let open M in
+        let open! M in
         let b = true in
         let x =
           begin%monoid
@@ -103,7 +103,7 @@ let tests =
         assert_equal x "foobar")
 
   ; "if-then" >:: (fun () ->
-        let open M in
+        let open! M in
         let b = true in
         let x =
           begin%monoid
@@ -117,7 +117,7 @@ let tests =
 
   (* match expressions *)
   ; "match" >:: (fun () ->
-        let open M in
+        let open! M in
         let o = Some "foo" in
         let x =
           begin%monoid

@@ -1,3 +1,4 @@
 PKG oUnit
 FLG -ppx ../src/_build/native_bin/ppx_monoid
 FLG -safe-string
+FLG -w A-4-9-34
