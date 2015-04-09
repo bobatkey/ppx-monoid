@@ -7,9 +7,9 @@
 #
 # FIXME: abort if there are .ml(i) files that would be overwritten by
 # ocamllex or menhir
-#
-# FIXME: is it possible to have libraries (.cm(x)a) inside other
-# libraries?
+
+# FIXME: ought to warn about LIB lines in .mllib files, and other
+# syntax errors in the .merlin, *.mllib and *.mlbin files
 
 ifndef SRCDIR
 $(error SRCDIR must be set)
@@ -26,16 +26,21 @@ endif
 BYTE_BINDIR    := $(BUILDDIR)/byte_bin
 NATIVE_BINDIR  := $(BUILDDIR)/native_bin
 
-OCAML_LIBS     := $(shell cat $(SRCDIR)/.merlin | grep ^PKG | cut -d' ' -f2)
+OCAML_LIBS     := $(shell cat $(SRCDIR)/.merlin | grep ^PKG | sed -E 's/^PKG +//')
 OCAML_PKGS_OPT := $(foreach lib,$(OCAML_LIBS),-package $(lib))
 
 # FIXME: work out the PPX_BINS from this too, so we can depend on them, and have a proper way of getting the paths corrected
 
-# Use 'realpath -m --relative-to=. $(SRCDIR)/blah' to get proper paths
-OCAMLC_FLAGS  := $(patsubst ../%,%,$(shell cat $(SRCDIR)/.merlin | grep ^FLG | sed 's/^FLG //' | tr '\n' ' '))
+MERLIN_FLAGS := $(shell cat $(SRCDIR)/.merlin | grep ^FLG | cut -d' ' -f2- | grep -v '^ *-ppx')
+MERLIN_PPX   :=\
+  $(foreach ppx,$(shell cat $(SRCDIR)/.merlin | egrep '^FLG +-ppx +' | sed -E 's/^FLG +-ppx +//'),$(shell realpath -m --relative-to=. $(SRCDIR)/$(ppx)))
 
-OCAMLC        := ocamlfind ocamlc $(OCAMLC_FLAGS) $(OCAML_PKGS_OPT)
-OCAMLOPT      := ocamlfind ocamlopt $(OCAMLC_FLAGS) $(OCAML_PKGS_OPT)
+OCAMLC_FLAGS  := $(MERLIN_FLAGS) \
+                 $(foreach ppx,$(MERLIN_PPX),-ppx $(ppx)) \
+                 $(OCAML_PKGS_OPT)
+
+OCAMLC        := ocamlfind ocamlc -I $(BUILDDIR) $(OCAMLC_FLAGS)
+OCAMLOPT      := ocamlfind ocamlopt -I $(BUILDDIR) $(OCAMLC_FLAGS)
 OCAMLDEP_OPTS := -I $(SRCDIR)/ -ml-synonym .mll -ml-synonym .mly -mli-synonym .mly
 OCAMLDEP      := ocamlfind ocamldep $(OCAML_PKGS_OPT) $(OCAMLDEP_OPTS)
 MENHIR        := menhir
@@ -63,6 +68,7 @@ $(BUILDDIR)/%.d: OCAMLDEP      := $(OCAMLDEP)
 $(BUILDDIR)/%.d: BYTE_BINDIR   := $(BYTE_BINDIR)
 $(BUILDDIR)/%.d: NATIVE_BINDIR := $(NATIVE_BINDIR)
 
+# FIXME: should probably just be OCAMLC and OCAMLC_FLAGS, which includes -I ...
 $(BUILDDIR)/%.cmo: OCAMLC      := $(OCAMLC)
 $(BUILDDIR)/%.cmo: BUILDDIR    := $(BUILDDIR)
 $(BUILDDIR)/%.cmi: OCAMLC      := $(OCAMLC)
@@ -95,13 +101,13 @@ $(OCAML_ML_DEPS): $(BUILDDIR)/%.ml.d: $(SRCDIR)/%.ml $(SRCDIR)/.merlin | $(BUILD
 
 -include $(OCAML_ML_DEPS)
 
-$(BUILDDIR)/%.cmo: $(SRCDIR)/%.ml $(SRCDIR)/.merlin $(PPX_BINS) | $(BUILDDIR) ocaml-tidy
+$(BUILDDIR)/%.cmo: $(SRCDIR)/%.ml $(SRCDIR)/.merlin $(MERLIN_PPX) | $(BUILDDIR) ocaml-tidy
 	@echo Compiling module $* '(bytecode)'
-	@$(OCAMLC) -I $(BUILDDIR) -o $@ -c $<
+	@$(OCAMLC) -o $@ -c $<
 
-$(BUILDDIR)/%.cmx: $(SRCDIR)/%.ml $(SRCDIR)/.merlin $(PPX_BINS) | $(BUILDDIR) ocaml-tidy
+$(BUILDDIR)/%.cmx: $(SRCDIR)/%.ml $(SRCDIR)/.merlin $(MERLIN_PPX) | $(BUILDDIR) ocaml-tidy
 	@echo Compiling module $* '(native)'
-	@$(OCAMLOPT) -I $(BUILDDIR) -o $@ -c $<
+	@$(OCAMLOPT) -o $@ -c $<
 
 ##################################################
 ## .mli files
@@ -116,9 +122,9 @@ $(OCAML_MLI_DEPS): $(BUILDDIR)/%.mli.d: $(SRCDIR)/%.mli $(SRCDIR)/.merlin | $(BU
 
 -include $(OCAML_MLI_DEPS)
 
-$(BUILDDIR)/%.cmi: $(SRCDIR)/%.mli $(SRCDIR)/.merlin $(PPX_BINS) | $(BUILDDIR) ocaml-tidy
+$(BUILDDIR)/%.cmi: $(SRCDIR)/%.mli $(SRCDIR)/.merlin $(MERLIN_PPX) | $(BUILDDIR) ocaml-tidy
 	@echo Compiling interface $*
-	@$(OCAMLC) -I $(BUILDDIR) -o $@ -c $<
+	@$(OCAMLC) -o $@ -c $<
 
 ##################################################
 ## .mll files
@@ -163,7 +169,7 @@ $(OCAML_MENHIR_DEPS): $(BUILDDIR)/%.mly.d: $(SRCDIR)/%.mly $(SRCDIR)/.merlin | $
 
 $(SRCDIR)/%.mli $(SRCDIR)/%.ml: $(SRCDIR)/%.mly
 	@echo Generating parser $*
-	@menhir --infer --ocamlc '$(OCAMLC) -I $(BUILDDIR)' $<
+	@menhir --infer --ocamlc '$(OCAMLC)' $<
 
 ##################################################
 ## .mllib files
@@ -178,19 +184,19 @@ OCAML_PRODUCTS += \
 # FIXME: use private local variable to add linker options
 $(OCAML_LIB_DEPS): $(BUILDDIR)/%.mllib.d: $(SRCDIR)/%.mllib $(SRCDIR)/.merlin | $(BUILDDIR)
 	@(echo "$(BUILDDIR)/$*.cma:" \
-           $$(cat $< | sed -E 's#MOD +(.*)$$#$(BUILDDIR)/\1.cmo#' | sed -E 's#LIB +(.*)$$#$(BUILDDIR)/\1.cma#' | tr '\n' ' '); \
+           $$(cat $< | sed -E 's#MOD +(.*)$$#$(BUILDDIR)/\1.cmo#' | tr '\n' ' '); \
 	  echo "$(BUILDDIR)/$*.cmxa:" \
-           $$(cat $< | sed -E 's#MOD +(.*)$$#$(BUILDDIR)/\1.cmx#' | sed -E 's#LIB +(.*)$$#$(BUILDDIR)/\1.cmxa#' | tr '\n' ' ')) > $@
+           $$(cat $< | sed -E 's#MOD +(.*)$$#$(BUILDDIR)/\1.cmx#' | tr '\n' ' ')) > $@
 
 -include $(OCAML_LIB_DEPS)
 
 $(BUILDDIR)/%.cma: $(SRCDIR)/%.mllib $(SRCDIR)/.merlin | $(BUILDDIR) ocaml-tidy
 	@echo Compiling library $* '(bytecode)'
-	@$(OCAMLC) -a $(filter %.cmo %.cma,$+) -o $@
+	@$(OCAMLC) -a $(filter %.cmo,$+) -o $@
 
 $(BUILDDIR)/%.cmxa: $(SRCDIR)/%.mllib $(SRCDIR)/.merlin | $(BUILDDIR) ocaml-tidy
 	@echo Compiling library $* '(native)'
-	@$(OCAMLOPT) -a $(filter %.cmx %.cmxa,$+) -o $@
+	@$(OCAMLOPT) -a $(filter %.cmx,$+) -o $@
 
 ##################################################
 ## .mlbin files

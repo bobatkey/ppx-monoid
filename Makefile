@@ -1,17 +1,17 @@
 .DEFAULT_GOAL := all
 .PHONY: all test clean install uninstall
 
+######################################################################
 SRCDIR := src
 include OCamlSrcs.makefile
 
 SRCDIR := test
-PPX_BINS := src/_build/native_bin/ppx_monoid
 include OCamlSrcs.makefile
 
 ######################################################################
 all: src/_build/native_bin/ppx_monoid META
 
-install: all
+install: src/_build/native_bin/ppx_monoid META
 	@ocamlfind install ppx_monoid META src/_build/native_bin/ppx_monoid
 
 uninstall:
