@@ -3,10 +3,10 @@
 
 ######################################################################
 SRCDIR := src
-include OCamlSrcs.makefile
+include build-support/OCamlSrcs.makefile
 
 SRCDIR := test
-include OCamlSrcs.makefile
+include build-support/OCamlSrcs.makefile
 
 ######################################################################
 all: src/_build/native_bin/ppx_monoid META
