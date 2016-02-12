@@ -65,7 +65,7 @@ let rec translate ops mapper expr = match expr.pexp_desc with
 and map_expr mapper expr = match expr.pexp_desc with
   | Pexp_extension ({txt}, PStr [{pstr_desc=Pstr_eval (expr, _)}]) ->
      (match split_extension_name txt with
-       | "monoid", None ->
+       | ("monoid" | "concatenate" | "concat"), None ->
           let ops =
             { empty = (fun loc -> {[%expr empty] with pexp_loc=loc})
             ; add   = (fun loc -> {[%expr (^^)] with pexp_loc=loc})
@@ -73,7 +73,7 @@ and map_expr mapper expr = match expr.pexp_desc with
           in
           translate ops mapper expr
 
-       | "monoid", Some prefix ->
+       | ("monoid" | "concatenate" | "concat"), Some prefix ->
           let with_prefix ident loc =
             Exp.ident ~loc
               (Location.mkloc (Longident.Ldot (prefix, ident)) loc)
