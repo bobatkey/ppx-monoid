@@ -1,2 +1,2 @@
 version = "$(pkg_version)"
-ppx = "./ppx_monoid"
+ppx = "./ppx_monoid.native"

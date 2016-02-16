@@ -1,28 +1,36 @@
 .DEFAULT_GOAL := all
 .PHONY: all test clean install uninstall
 
-######################################################################
-SRCDIR := src
-include build-support/OCamlSrcs.makefile
+all: ppx_monoid.native
 
-SRCDIR := test
-include build-support/OCamlSrcs.makefile
+ppx_monoid.native:
+	ocamlbuild \
+      -use-ocamlfind \
+      -package compiler-libs \
+      -package ppx_tools.metaquot \
+      -package ppx_tools \
+      src/ppx_monoid.native
 
-######################################################################
-all: src/_build/native_bin/ppx_monoid META
+test.native: ppx_monoid.native
+	ocamlbuild \
+      -use-ocamlfind \
+      -package oUnit \
+      -cflags -ppx,../ppx_monoid.native \
+      test/test.native
 
-install: src/_build/native_bin/ppx_monoid META
-	@ocamlfind install ppx_monoid META src/_build/native_bin/ppx_monoid
+install: ppx_monoid.native META
+	@ocamlfind install ppx_monoid META ppx_monoid.native
 
 uninstall:
 	@ocamlfind remove ppx_monoid
 
-test: test/_build/native_bin/test
-	@test/_build/native_bin/test
+test: test.native
+	@./test.native
 
 clean:
-	rm -rf src/_build
-	rm -rf test/_build
+	rm -rf _build
+	rm -f ppx_monoid.native
+	rm -f test.native
 	rm -f META
 	rm -f oUnit-anon.cache
 

@@ -8,13 +8,13 @@ bug-reports: "https://github.com/bobatkey/ppx-monoid"
 license: "MIT"
 dev-repo: "https://github.com/bobatkey/ppx-monoid.git"
 build: [
-  ["build-support/build"]
   [make]
 ]
 install: [make "install"]
 remove: ["ocamlfind" "remove" "ppx_monoid"]
 depends: [
   "ocamlfind" {build}
+  "ocamlbuild" {build}
   "ppx_tools" {build & >= "0.99.2"}
 ]
 available: [ ocaml-version >= "4.02.1" ]

@@ -1,4 +1,0 @@
-#!/bin/sh
-
-cd build-support
-ocamlc -o of_merlin of_merlin.ml
