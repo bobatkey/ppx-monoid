@@ -1,6 +1,6 @@
 *~
-_build
+/_build
 /oUnit-anon.cache
-META
+/META
 /ppx_monoid.native
 /test.native
