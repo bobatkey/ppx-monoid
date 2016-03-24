@@ -34,7 +34,7 @@ clean:
 	rm -f META
 	rm -f oUnit-anon.cache
 
-PKG_VERSION := 0.1
+PKG_VERSION := 0.2
 
 META: META.in
 	@sed 's/$$(pkg_version)/$(PKG_VERSION)/g' < $< > $@
