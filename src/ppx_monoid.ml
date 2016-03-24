@@ -59,6 +59,14 @@ let rec translate ops mapper expr = match expr.pexp_desc with
      in
      {expr with pexp_desc=Pexp_let (recflag, bindings, body)}
 
+  | Pexp_open (override, ident, expr) ->
+     let expr = translate ops mapper expr in
+     {expr with pexp_desc=Pexp_open (override, ident, expr)}
+
+  | Pexp_letmodule (name, module_expr, expr) ->
+     let expr = translate ops mapper expr in
+     {expr with pexp_desc=Pexp_letmodule (name, module_expr, expr)}
+
   | _ ->
      map_expr mapper expr
 

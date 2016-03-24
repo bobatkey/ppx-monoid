@@ -21,7 +21,7 @@ let tests =
 
   ; "specified module" >:: (fun () ->
         assert_equal (begin%monoid.M "foo"; "bar" end) "foobar")
-    
+
   ; "let open" >:: (fun () ->
         let open! M in
         assert_equal (begin%monoid "foo"; "bar" end) "foobar")
@@ -85,7 +85,7 @@ let tests =
         in
         assert_equal x "foobar")
 
-(* If-then-else expressions *)
+  (* If-then-else expressions *)
   ; "if-then-else" >:: (fun () ->
         let open! M in
         let b = true in
@@ -130,6 +130,30 @@ let tests =
           end
         in
         assert_equal x "foofoobaz")
+
+  (* local opens *)
+  ; "local open" >:: (fun () ->
+        let open! M in
+        let x =
+          begin%concat
+            let open String in
+            "foo";
+            string_of_int (length "bar")
+          end
+        in
+        assert_equal x "foo3")
+
+  (* local module definitions *)
+  ; "local module" >:: (fun () ->
+        let open! M in
+        let x =
+          begin%concat
+            let module X = struct let x = "bar" end in
+            "foo";
+            X.x
+          end
+        in
+        assert_equal ~printer:(fun s -> s) x "foobar")
   ]
 
 let _ =
