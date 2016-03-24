@@ -3,7 +3,7 @@
 
 all: ppx_monoid.native
 
-ppx_monoid.native:
+ppx_monoid.native: src/*.ml
 	ocamlbuild \
       -use-ocamlfind \
       -package compiler-libs \
@@ -11,7 +11,7 @@ ppx_monoid.native:
       -package ppx_tools \
       src/ppx_monoid.native
 
-test.native: ppx_monoid.native
+test.native: ppx_monoid.native test/*.ml
 	ocamlbuild \
       -use-ocamlfind \
       -package oUnit \
