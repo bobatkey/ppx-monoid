@@ -1,6 +1,4 @@
 *~
 /_build
-/oUnit-anon.cache
-/META
-/ppx_monoid.native
-/test.native
+.merlin
+/*.install

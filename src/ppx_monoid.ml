@@ -1,3 +1,9 @@
+open Migrate_parsetree
+
+open Ast_404
+
+let ocaml_version = Versions.ocaml_404
+
 open Asttypes
 open Parsetree
 open Ast_mapper
@@ -99,5 +105,6 @@ and map_expr mapper expr = match expr.pexp_desc with
   | _ ->
      default_mapper.expr mapper expr
 
-let _ =
-  register "ppx_monoid" (fun _ -> {default_mapper with expr = map_expr})
+let () =
+  Driver.register ~name:"ppx_monoid" ocaml_version
+    (fun _ _ -> {default_mapper with expr = map_expr})
