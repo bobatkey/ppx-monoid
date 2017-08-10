@@ -8,4 +8,8 @@ bug-reports: "https://github.com/bobatkey/ppx-monoid"
 license: "MIT"
 dev-repo: "git+https://github.com/bobatkey/ppx-monoid.git"
 build: [["jbuilder" "build" "-p" name "-j" jobs "@install"]]
+depends: ["jbuilder"                {build}
+          "ocaml-migrate-parsetree" {build}
+          "ppx_tools_versioned"     {build}
+          "ocamlfind"]
 available: [ ocaml-version >= "4.04.0" ]
