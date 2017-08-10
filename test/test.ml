@@ -154,6 +154,20 @@ let tests =
           end
         in
         assert_equal ~printer:(fun s -> s) x "foobar")
+
+  ; "while loop" >:: (fun () ->
+        let open! M in
+        let m =
+          begin%concat
+            let x = ref 3 in
+            while !x > 0 do
+              let _ = decr x in
+              "foo"
+            done
+          end
+        in
+        assert_equal ~printer:(fun s -> s) m "foofoofoo")
+
   ]
 
 let _ =

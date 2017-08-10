@@ -30,6 +30,21 @@ let rec translate ops mapper expr = match expr.pexp_desc with
   | Pexp_construct ({txt=Longident.Lident "()"}, None) ->
      ops.empty expr.pexp_loc
 
+  | Pexp_while (test_expr, body_expr) ->
+     (* FIXME: generate symbols for 'loop' and 'while' *)
+     (* FIXME: do 'for' loops as well *)
+     [%expr
+       let rec loop accum =
+         if [%e test_expr] then
+           loop ([%e ops.add expr.pexp_loc]
+                   accum
+                   [%e translate ops mapper body_expr])
+         else
+           accum
+       in
+       loop [%e ops.empty expr.pexp_loc]
+     ]
+
   | Pexp_sequence (expr1, expr2) ->
      let expr1 = translate ops mapper expr1 in
      let expr2 = translate ops mapper expr2 in
