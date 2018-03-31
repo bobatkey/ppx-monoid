@@ -168,6 +168,20 @@ let tests =
         in
         assert_equal ~printer:(fun s -> s) m "foofoofoo")
 
+  ; "for loop" >:: (fun () ->
+        let open! M in
+        let m =
+          begin%concat
+            for i = 0 to 3 do
+              string_of_int i
+            done;
+            for i = 3 downto 0 do
+              string_of_int i
+            done
+          end
+        in
+        assert_equal ~printer:(fun s -> s) m "01233210")
+
   ]
 
 let _ =
