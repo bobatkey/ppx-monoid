@@ -31,13 +31,12 @@ let rec translate ops mapper expr = match expr.pexp_desc with
      ops.empty expr.pexp_loc
 
   | Pexp_while (test_expr, body_expr) ->
-     (* FIXME: generate symbols for 'loop' and 'while' *)
      [%expr
+       let body () = [%e translate ops mapper body_expr]
+       and test () = [%e test_expr] in
        let rec loop accum =
-         if [%e test_expr] then
-           loop ([%e ops.add expr.pexp_loc]
-                   accum
-                   [%e translate ops mapper body_expr])
+         if test () then
+           loop ([%e ops.add expr.pexp_loc] accum (body ()))
          else
            accum
        in
@@ -46,22 +45,24 @@ let rec translate ops mapper expr = match expr.pexp_desc with
 
   | Pexp_for (pat, init, final, Upto, body) ->
      [%expr
+       let body [%p pat] = [%e translate ops mapper body] in
        let limit = [%e final] in
        let rec loop i accum =
          if i > limit then accum
-         else loop (i+1) ([%e ops.add expr.pexp_loc] accum (let [%p pat] = i in [%e translate ops mapper body]))
+         else loop (i+1) ([%e ops.add expr.pexp_loc] accum (body i))
        in
        loop [%e init] [%e ops.empty expr.pexp_loc]
      ]
 
   | Pexp_for (pat, init, final, Downto, body) ->
      [%expr
-       let limit = [%e final] in
-       let rec loop i accum =
-         if i < limit then accum
-         else loop (i-1) ([%e ops.add expr.pexp_loc] accum (let [%p pat] = i in [%e translate ops mapper body]))
-       in
-       loop [%e init] [%e ops.empty expr.pexp_loc]
+        let body [%p pat] = [%e translate ops mapper body] in
+        let limit = [%e final] in
+        let rec loop i accum =
+          if i < limit then accum
+          else loop (i-1) ([%e ops.add expr.pexp_loc] accum (body i))
+        in
+        loop [%e init] [%e ops.empty expr.pexp_loc]
      ]
 
   | Pexp_sequence (expr1, expr2) ->

@@ -10,21 +10,21 @@ let tests =
   "ppx_monoid" >:::
   [ "empty" >:: (fun () ->
         let empty = "empty" in
-        assert_equal (begin%monoid end) empty)
+        assert_equal empty (begin%monoid end))
 
   ; "one operation" >:: (fun () ->
         let (^^) = (^) in
-        assert_equal (begin%monoid "foo"; "bar" end) "foobar")
+        assert_equal "foobar" (begin%monoid "foo"; "bar" end))
 
   ; "single" >:: (fun () ->
-        assert_equal (begin%monoid "foo" end) "foo")
+        assert_equal "foo" (begin%monoid "foo" end))
 
   ; "specified module" >:: (fun () ->
-        assert_equal (begin%monoid.M "foo"; "bar" end) "foobar")
+        assert_equal "foobar" (begin%monoid.M "foo"; "bar" end))
 
   ; "let open" >:: (fun () ->
         let open! M in
-        assert_equal (begin%monoid "foo"; "bar" end) "foobar")
+        assert_equal "foobar" (begin%monoid "foo"; "bar" end))
 
   ; "nested let" >:: (fun () -> 
         let x =
@@ -33,7 +33,7 @@ let tests =
             x; x
           end
         in
-        assert_equal x "foofoo")
+        assert_equal "foofoo" x)
 
   ; "nested let begin..end" >:: (fun () ->
         let open! M in
@@ -45,7 +45,7 @@ let tests =
             x; x
           end
         in
-        assert_equal x "foofoo")
+        assert_equal "foofoo" x)
 
   (* Nesting begin..end expressions *)
   ; "nested begin..end, left" >:: (fun () ->
@@ -59,7 +59,7 @@ let tests =
             "baz"
           end
         in
-        assert_equal x "foobarbaz")
+        assert_equal "foobarbaz" x)
 
   ; "nested begin..end, right" >:: (fun () ->
         let open! M in
@@ -72,7 +72,7 @@ let tests =
             end;
           end
         in
-        assert_equal x "bazfoobar")
+        assert_equal "bazfoobar" x)
 
   (* Without begin..end *)
   ; "without begin..end" >:: (fun () ->
@@ -83,7 +83,7 @@ let tests =
             "bar"
           ]
         in
-        assert_equal x "foobar")
+        assert_equal "foobar" x)
 
   (* If-then-else expressions *)
   ; "if-then-else" >:: (fun () ->
@@ -100,7 +100,7 @@ let tests =
             end
           end
         in
-        assert_equal x "foobar")
+        assert_equal "foobar" x)
 
   ; "if-then" >:: (fun () ->
         let open! M in
@@ -113,7 +113,7 @@ let tests =
             end
           end
         in
-        assert_equal x "foobar")
+        assert_equal "foobar" x)
 
   (* match expressions *)
   ; "match" >:: (fun () ->
@@ -129,7 +129,7 @@ let tests =
             "baz"
           end
         in
-        assert_equal x "foofoobaz")
+        assert_equal "foofoobaz" x)
 
   (* local opens *)
   ; "local open" >:: (fun () ->
@@ -153,7 +153,7 @@ let tests =
             X.x
           end
         in
-        assert_equal ~printer:(fun s -> s) x "foobar")
+        assert_equal ~printer:(fun s -> s) "foobar" x)
 
   ; "while loop" >:: (fun () ->
         let open! M in
@@ -166,7 +166,7 @@ let tests =
             done
           end
         in
-        assert_equal ~printer:(fun s -> s) m "foofoofoo")
+        assert_equal ~printer:(fun s -> s) "foofoofoo" m)
 
   ; "for loop" >:: (fun () ->
         let open! M in
@@ -180,7 +180,32 @@ let tests =
             done
           end
         in
-        assert_equal ~printer:(fun s -> s) m "01233210")
+        assert_equal ~printer:(fun s -> s) "01233210" m)
+
+  ; "for loop clash" >:: (fun () ->
+        let open! M in
+        let accum = "foo" in
+        let m =
+          begin%concat
+            for i = 1 to 3 do
+              accum
+            done;
+          end
+        in
+        assert_equal ~printer:(fun s -> s) "foofoofoo" m)
+
+  ; "for loop downto clash" >:: (fun () ->
+        let open! M in
+        let accum = "foo" in
+        let loop = "bar" in
+        let m =
+          begin%concat
+            for i = 3 downto 1 do
+              accum; loop
+            done;
+          end
+        in
+        assert_equal ~printer:(fun s -> s) "foobarfoobarfoobar" m)
 
   ]
 
