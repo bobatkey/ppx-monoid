@@ -1,8 +1,0 @@
-(jbuild_version 1)
-
-(library
- ((name ppx_monoid)
-  (public_name ppx_monoid)
-  (libraries (ocaml-migrate-parsetree))
-  (kind ppx_rewriter)
-  (preprocess (pps (ppx_tools_versioned.metaquot_404)))))
