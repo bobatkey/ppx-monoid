@@ -7,8 +7,8 @@ homepage: "https://github.com/bobatkey/ppx-monoid"
 bug-reports: "https://github.com/bobatkey/ppx-monoid"
 license: "MIT"
 dev-repo: "git+https://github.com/bobatkey/ppx-monoid.git"
-build: [["jbuilder" "build" "-p" name "-j" jobs "@install"]]
-depends: ["jbuilder"                {build}
+build: [["dune" "build" "-p" name "-j" jobs "@install"]]
+depends: ["dune"                    {build}
           "ocaml-migrate-parsetree" {build}
           "ppx_tools_versioned"     {build}
           "ocamlfind"]
