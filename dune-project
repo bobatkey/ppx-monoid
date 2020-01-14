@@ -2,7 +2,7 @@
 (generate_opam_files true)
 
 (name ppx_monoid)
-(version 0.3.1)
+(version 0.3.2)
 
 (authors "Robert Atkey")
 (license MIT)
