@@ -11,7 +11,7 @@
 
 (package
  (name ppx_monoid)
- (synopsis "Syntax extension for building values of monoids.")
+ (synopsis "Syntax extension for building values of monoids")
  (description "This is a syntax extension for OCaml to make building values of
 monoids easier. Assumes the existence of two operations in scope for
 some type `t`:
