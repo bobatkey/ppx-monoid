@@ -30,4 +30,4 @@ the unit expression `()` to mean `empty`.")
   (ocaml-migrate-parsetree (>= 1.5.0))
   (ppx_tools_versioned (>= 5.2.3))
 
-  (ounit :dev)))
+  (ounit :with-test)))
