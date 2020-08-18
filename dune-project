@@ -2,7 +2,7 @@
 (generate_opam_files true)
 
 (name ppx_monoid)
-(version 0.3.2)
+(version 0.3.3)
 
 (authors "Robert Atkey")
 (license MIT)
@@ -27,7 +27,6 @@ the unit expression `()` to mean `empty`.")
  (depends
   (dune (>= 2.0))
   (ocaml (>= 4.04.0))
-  (ocaml-migrate-parsetree (>= 1.5.0))
-  (ppx_tools_versioned (>= 5.2.3))
+  (ppxlib (>= 0.15.0))
 
   (ounit :with-test)))

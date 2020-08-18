@@ -26,7 +26,7 @@ let tests =
         let open! M in
         assert_equal "foobar" (begin%monoid "foo"; "bar" end))
 
-  ; "nested let" >:: (fun () -> 
+  ; "nested let" >:: (fun () ->
         let x =
           begin%monoid.M
             let x = "foo" in
