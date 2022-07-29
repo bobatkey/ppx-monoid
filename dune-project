@@ -25,8 +25,7 @@ empty : t
 reinterprets the semicolon `;` to mean the monoid operation `^^` and
 the unit expression `()` to mean `empty`.")
  (depends
-  (dune (>= 2.0))
-  (ocaml (>= 4.04.1))
+  (ocaml  (>= 4.04.1))
   (ppxlib (>= 0.27.0))
 
   (ounit :with-test)))
