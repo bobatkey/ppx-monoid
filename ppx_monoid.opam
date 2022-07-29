@@ -22,9 +22,9 @@ homepage: "https://github.com/bobatkey/ppx-monoid"
 bug-reports: "https://github.com/bobatkey/ppx-monoid/issues"
 depends: [
   "dune" {>= "2.0"}
-  "ocaml" {>= "4.04.0"}
-  "ppxlib" {>= "0.15.0"}
-  "ounit" {with-test}
+  "ocaml" {>= "4.04.1"}
+  "ppxlib" {>= "0.27.0"}
+  "ounit2" {with-test}
 ]
 build: [
   ["dune" "subst"] {pinned}
